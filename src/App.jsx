@@ -2,10 +2,15 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 
-// Public Pages
+// Public Layout & Pages
+import PublicLayout from './layouts/PublicLayout';
 import Home from './pages/public/Home';
+import RoomsPublic from './pages/public/Rooms';
+import RestaurantPublic from './pages/public/Restaurant';
+import AboutPublic from './pages/public/About';
+import ContactPublic from './pages/public/Contact';
 
-// Admin Layout & Components
+// Admin Layout & Components (Preserved Intact)
 import AdminLayout from './layouts/AdminLayout';
 import AdminLogin from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
@@ -29,8 +34,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
+        {/* Public Website Routes */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/rooms" element={<RoomsPublic />} />
+          <Route path="/restaurant" element={<RestaurantPublic />} />
+          <Route path="/about" element={<AboutPublic />} />
+          <Route path="/contact" element={<ContactPublic />} />
+        </Route>
 
         {/* Admin Login */}
         <Route path="/admin/login" element={<AdminLogin />} />
