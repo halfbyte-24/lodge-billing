@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { MessageCircle, Menu, X } from 'lucide-react';
 import { hotelInfo, getWhatsAppUrl } from '../../config/hotelInfo';
 
@@ -9,20 +9,26 @@ const PublicNavbar = () => {
   const resetTimerRef = useRef(null);
   const navigate = useNavigate();
 
-  // Easter egg: 7 clicks on the logo navigates to admin login
-  const handleLogoClick = () => {
+  // Exactly 7 clicks/taps on the hotel brand navigates to /admin/login
+  const handleBrandClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     clickCountRef.current += 1;
+
+    // Clear existing timer if clicked again within the window
     if (resetTimerRef.current) {
       clearTimeout(resetTimerRef.current);
     }
 
-    if (clickCountRef.current >= 7) {
+    if (clickCountRef.current === 7) {
       clickCountRef.current = 0;
       navigate('/admin/login');
     } else {
+      // Reset counter after 2.5 seconds of inactivity
       resetTimerRef.current = setTimeout(() => {
         clickCountRef.current = 0;
-      }, 2000);
+      }, 2500);
     }
   };
 
@@ -33,11 +39,21 @@ const PublicNavbar = () => {
   return (
     <header className="public-header">
       <div className="header-container">
-        {/* Brand Logo */}
-        <Link to="/" className="brand-logo" onClick={handleLogoClick}>
+        {/* Brand Logo with 7-click secret admin trigger */}
+        <div
+          role="button"
+          tabIndex={0}
+          className="brand-logo"
+          onClick={handleBrandClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleBrandClick(e);
+          }}
+          style={{ cursor: 'pointer', userSelect: 'none', touchAction: 'manipulation' }}
+          aria-label="Sunrise Lodge & Restaurant"
+        >
           <span className="brand-logo-title">SUNRISE</span>
           <span className="brand-logo-subtitle">Lodge & Restaurant</span>
-        </Link>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="main-nav" aria-label="Main Navigation">

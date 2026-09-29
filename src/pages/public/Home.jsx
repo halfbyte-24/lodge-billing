@@ -6,9 +6,6 @@ import {
   Clock,
   MapPin,
   Wifi,
-  Tv,
-  Wind,
-  Bath,
   ArrowRight,
   MessageCircle,
   ShieldCheck,
@@ -16,7 +13,7 @@ import {
   Sparkles,
   ChevronRight
 } from 'lucide-react';
-import { hotelInfo, getWhatsAppUrl, getDirectionsUrl } from '../../config/hotelInfo';
+import { hotelInfo, getWhatsAppUrl } from '../../config/hotelInfo';
 import { hotelImages } from '../../config/images';
 import LocationMap from '../../components/public/LocationMap';
 

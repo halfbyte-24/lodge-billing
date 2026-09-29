@@ -154,11 +154,6 @@ const PublicFooter = () => {
             <button type="button" onClick={() => openLegalModal('terms')}>
               Terms & Conditions
             </button>
-            <span>•</span>
-            {/* Discreet Staff Login */}
-            <Link to="/admin/login" className="footer-staff-link" title="Staff & Reception Portal">
-              Staff Portal
-            </Link>
           </div>
         </div>
       </div>
