@@ -30,7 +30,7 @@ const Rooms = () => {
             id,
             name,
             capacity,
-            has_ac
+            facilities
           )
         `)
         .eq('is_active', true)
@@ -63,8 +63,8 @@ const Rooms = () => {
 
   const filteredRooms = rooms.filter(room => {
     if (filter === 'All') return true;
-    if (filter === 'AC') return room.room_types?.has_ac;
-    if (filter === 'Non-AC') return !room.room_types?.has_ac;
+    if (filter === 'AC') return room.room_types?.facilities?.includes('AC');
+    if (filter === 'Non-AC') return !room.room_types?.facilities?.includes('AC');
     return room.room_types?.name === filter;
   });
 
@@ -75,6 +75,15 @@ const Rooms = () => {
       case 'cleaning': return 'badge cleaning';
       case 'maintenance': return 'badge maintenance';
       default: return 'badge';
+    }
+  };
+
+  const getRoomImage = (roomType) => {
+    switch (roomType) {
+      case 'Deluxe': return 'https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'; // Deluxe room
+      case 'Super Deluxe': return 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'; // Luxury room
+      case 'Family': return 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'; // Family room
+      default: return 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'; // Standard room
     }
   };
 
@@ -110,23 +119,55 @@ const Rooms = () => {
 
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center' }}>Loading rooms...</div>
+      ) : rooms.length === 0 ? (
+        <div style={{ padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', margin: '2rem 0' }}>
+          <h3 style={{ fontSize: '1.25rem', color: '#1e293b', marginBottom: '0.5rem' }}>No rooms found.</h3>
+          <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>Click Seed Dummy Data to load demo rooms.</p>
+          <button 
+            className="btn btn-primary" 
+            onClick={handleSeed} 
+            disabled={seeding}
+          >
+            {seeding ? 'Seeding Database...' : 'Seed Dummy Data'}
+          </button>
+        </div>
+      ) : filteredRooms.length === 0 ? (
+        <div style={{ padding: '4rem 2rem', textAlign: 'center', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', margin: '2rem 0' }}>
+          <h3 style={{ fontSize: '1.25rem', color: '#1e293b', marginBottom: '0.5rem' }}>No rooms match the selected filter.</h3>
+          <p style={{ color: '#64748b', marginBottom: '1.5rem' }}>Try selecting 'All' or a different category.</p>
+          <button className="btn btn-outline" onClick={() => setFilter('All')}>Clear Filters</button>
+        </div>
       ) : (
-        <div className="item-grid">
+        <div className="item-grid" style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+          gap: '1.5rem' 
+        }}>
           {filteredRooms.map(room => {
             const isAvailable = room.status?.toLowerCase() === 'available';
             const roomType = room.room_types?.name || 'Standard';
+            const hasAC = room.room_types?.facilities?.includes('AC');
             
             return (
-              <div className="item-card" key={room.id}>
-                <div className="item-details" style={{ padding: '1.5rem' }}>
+              <div className="item-card" key={room.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                <img 
+                  src={getRoomImage(roomType)} 
+                  alt={`${roomType} Room`} 
+                  style={{ width: '100%', aspectRatio: '16/10', objectFit: 'cover', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }} 
+                />
+                <div className="item-details" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <div className="item-header">
                     <h3 className="item-title">Room {room.room_number}</h3>
                     <span className="item-price">₹{room.price}</span>
                   </div>
-                  <div className="item-category">{roomType}</div>
-                  <div className="item-meta">
-                    <span>Capacity: {room.room_types?.capacity || 2}</span>
-                    <span>• {room.room_types?.has_ac ? 'AC' : 'Non-AC'}</span>
+                  <div className="item-category">{roomType} Room</div>
+                  <div className="item-meta" style={{ marginTop: '0.25rem', marginBottom: '0.5rem' }}>
+                    <span>Floor {room.floor}</span>
+                  </div>
+                  <div className="item-meta" style={{ flex: 1 }}>
+                    <span>{room.room_types?.capacity || 2} Guests</span>
+                    <span>• {hasAC ? 'AC' : 'Non-AC'}</span>
+                    <span>• Wi-Fi</span>
                   </div>
                   <div style={{ marginBottom: '1rem', marginTop: '0.5rem' }}>
                     <span className={getStatusBadgeClass(room.status)}>{room.status}</span>
@@ -135,15 +176,16 @@ const Rooms = () => {
                     <button 
                       className={`btn ${isAvailable ? 'btn-primary' : 'btn-disabled'}`}
                       disabled={!isAvailable}
+                      style={{ width: '100%' }}
                       onClick={() => addItemToBill({
                         id: room.id,
                         roomId: room.id,
                         roomNumber: room.room_number,
-                        name: `Room ${room.room_number} - ${roomType}`,
+                        name: `Room ${room.room_number} - ${roomType} Room`,
                         price: room.price
                       }, 'Room')}
                     >
-                      {isAvailable ? 'Add to Bill' : 'Not Available'}
+                      {isAvailable ? 'Add to Bill' : room.status}
                     </button>
                   </div>
                 </div>
